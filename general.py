@@ -9,9 +9,6 @@ MOOD_NEUTRAL  = 0
 MOOD_WARMER   = 1
 MOOD_PRESSING = 2
 
-# ─────────────────────────────────────────────────────────────
-#  ПЕРЕВОДЫ ИНТЕРФЕЙСА
-# ─────────────────────────────────────────────────────────────
 UI = {
     "en": {
         "title_password":   "enter password",
@@ -57,9 +54,6 @@ UI = {
     },
 }
 
-# ─────────────────────────────────────────────────────────────
-#  КОНТЕНТ ПО ЯЗЫКАМ
-# ─────────────────────────────────────────────────────────────
 CONTENT = {
     "en": {
         "repeat_responses": [
@@ -534,20 +528,17 @@ class ChatClient:
 
         self.show_code_dialog()
 
-    # ── Shortcut ──────────────────────────────────────────────
     def ui(self, key):
         return UI[self.lang][key]
 
     def ct(self, key):
         return CONTENT[self.lang][key]
 
-    # ── Экран пароля ─────────────────────────────────────────
     def show_code_dialog(self):
         for w in self.root.winfo_children():
             w.destroy()
         self.root.title(self.ui("title_password"))
 
-        # Выбор языка вверху
         lang_frame = tk.Frame(self.root)
         lang_frame.pack(fill=tk.X, padx=20, pady=(15, 0))
         tk.Label(lang_frame, text="🌐", font=("Arial", 11)).pack(side=tk.LEFT, padx=(0,6))
@@ -587,7 +578,7 @@ class ChatClient:
         else:
             self.show_chat_window()
 
-    # ── Чат ───────────────────────────────────────────────────
+    # chat
     def show_chat_window(self):
         for w in self.root.winfo_children():
             w.destroy()
@@ -613,7 +604,6 @@ class ChatClient:
                                      font=("Arial", 14, "bold"), fg="#333333")
         self.status_label.pack(pady=6)
 
-    # ── Утилиты ───────────────────────────────────────────────
     def update_mood(self):
         if   self.message_count < 10: self.mood = MOOD_NEUTRAL
         elif self.message_count < 20: self.mood = MOOD_WARMER
@@ -655,7 +645,7 @@ class ChatClient:
                 return random.choice(resp)
         return random.choice(self.ct("default_by_mood")[self.mood])
 
-    # ── Отправка ──────────────────────────────────────────────
+    # send
     def send_message(self):
         if self.gone_silent:
             return
@@ -723,7 +713,6 @@ class ChatClient:
         else:
             self.status_label.config(text=self.ui("status_online"), fg="#333333")
 
-    # ── Типы поведения ────────────────────────────────────────
     def deliver_response(self, response):
         self.add_message(response)
         self._unlock_input()
@@ -772,7 +761,7 @@ class ChatClient:
             self.chat_area.delete(start, end)
         self.chat_area.config(state='disabled')
 
-    # ── Финальная сцена ───────────────────────────────────────
+    # final
     def send_creepy_message(self):
         scenarios = [
             self._finale_cold,
@@ -808,12 +797,10 @@ class ChatClient:
 
         line = line if line else random.choice(self.ct("finale_lines"))
 
-        # Основная фраза по центру
         main_label = tk.Label(overlay, text=line,
                               font=("Arial", 13), bg="#0d0d0d", fg="#0d0d0d")
         main_label.place(relx=0.5, rely=0.5, anchor="center")
 
-        # Подпись автора чуть ниже
         credit_label = tk.Label(overlay, text=self.ui("credit"),
                                 font=("Arial", 9), bg="#0d0d0d", fg="#0d0d0d")
         credit_label.place(relx=0.5, rely=0.5, anchor="center", y=30)
@@ -822,7 +809,6 @@ class ChatClient:
 
         def fade_in_main(step=0):
             if step > steps:
-                # После появления основной фразы — через 1 сек запустить подпись
                 self.root.after(1000, fade_in_credit)
                 return
             val = int(step / steps * 200)
@@ -832,13 +818,12 @@ class ChatClient:
         def fade_in_credit(step=0):
             if step > steps:
                 return
-            val = int(step / steps * 110)   # тусклее чем основная
+            val = int(step / steps * 110)  
             credit_label.config(fg=f"#{val:02x}{val:02x}{val:02x}")
             self.root.after(80, lambda: fade_in_credit(step + 1))
 
         self.root.after(800, fade_in_main)
 
-    # ── Вывод сообщений ───────────────────────────────────────
     def add_message(self, text):
         self.chat_area.config(state='normal')
         self.chat_area.insert(tk.END, text + "\n")
